@@ -629,7 +629,7 @@
     const pct = done === 0 ? 0 : done === 1 ? 33 : done === 2 ? 66 : 100;
     const stepsHtml = stepLabels.map((l, i) => `
     <div class="step-item">
-      <div class="step-circle ${b.steps[i] ? 'done' : i === done ? 'active' : ''}" onclick="toggleStep(${b.id},${i})">${b.steps[i] ? '&#10003;' : i + 1}</div>
+      <div class="step-circle ${b.steps[i] ? 'done' : i === done ? 'active' : ''}" onclick="toggleStep('${b.id}',${i})">${b.steps[i] ? '&#10003;' : i + 1}</div>
       <span class="step-label">${l}</span>
     </div>`).join('');
     return `<div class="card">
@@ -652,7 +652,7 @@
     </div>
     <div class="notes-section">
       <div class="notes-header">&#9203; History</div>
-      <textarea class="notes-input" rows="2" onchange="updateNotes('travel',${b.id},this.value)">${b.notes}</textarea>
+      <textarea class="notes-input" rows="2" onchange="updateNotes('travel','${b.id}',this.value)">${b.notes}</textarea>
     </div>
   </div>
 </div>`;
@@ -661,7 +661,7 @@
     const st = getSalesStatus(b.checks);
     const checksHtml = checkLabels.map((l, i) => `
     <label class="check-item">
-      <input type="checkbox" ${b.checks[i] ? 'checked' : ''} onchange="toggleCheck(${b.id},${i},this.checked)">
+      <input type="checkbox" ${b.checks[i] ? 'checked' : ''} onchange="toggleCheck('${b.id}',${i},this.checked)">
       <span class="check-label ${b.checks[i] ? 'checked' : ''}">${l}</span>
     </label>`).join('');
     return `<div class="card">
@@ -678,7 +678,7 @@
     <div class="checklist">${checksHtml}</div>
     <div class="notes-section">
       <div class="notes-header">&#9203; Notes</div>
-      <textarea class="notes-input" rows="2" onchange="updateNotes('sales',${b.id},this.value)">${b.notes}</textarea>
+      <textarea class="notes-input" rows="2" onchange="updateNotes('sales','${b.id}',this.value)">${b.notes}</textarea>
     </div>
   </div>
 </div>`;
