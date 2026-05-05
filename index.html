@@ -1,0 +1,769 @@
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0
+  }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--color-background-tertiary)
+  }
+
+  .app {
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative
+  }
+
+  .header {
+    background: var(--color-background-primary);
+    padding: 16px 20px 0;
+    border-bottom: 0.5px solid var(--color-border-tertiary);
+    position: sticky;
+    top: 0;
+    z-index: 10
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px
+  }
+
+  .header-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-text-primary)
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 16px
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 12px;
+    background: var(--color-background-secondary);
+    border-radius: 8px;
+    padding: 3px
+  }
+
+  .tab {
+    flex: 1;
+    padding: 8px 0;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    transition: all 0.2s
+  }
+
+  .tab.active {
+    background: var(--color-background-primary);
+    color: var(--color-text-primary);
+    border: 0.5px solid var(--color-border-tertiary)
+  }
+
+  .search-wrap {
+    position: relative;
+    margin: 0 0 8px
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    border-radius: 8px;
+    border: 0.5px solid var(--color-border-tertiary);
+    background: var(--color-background-secondary);
+    font-size: 13px;
+    color: var(--color-text-primary);
+    outline: none
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+    pointer-events: none
+  }
+
+  .cards {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    padding-bottom: 80px
+  }
+
+  .card {
+    background: var(--color-background-primary);
+    border-radius: 12px;
+    border: 0.5px solid var(--color-border-tertiary);
+    overflow: hidden
+  }
+
+  .card-header {
+    padding: 10px 14px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+  }
+
+  .status-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px
+  }
+
+  .badge-issued {
+    background: #e8f5e9;
+    color: #2e7d32
+  }
+
+  .badge-pending-lead {
+    background: #fff8e1;
+    color: #f57f17
+  }
+
+  .badge-getting-cl {
+    background: #fff8e1;
+    color: #e65100
+  }
+
+  .badge-pending-gl {
+    background: #fff3e0;
+    color: #bf360c
+  }
+
+  .badge-pending-approve {
+    background: #f3e5f5;
+    color: #6a1b9a
+  }
+
+  .badge-gl-approve {
+    background: #e3f2fd;
+    color: #0d47a1
+  }
+
+  .badge-pending-send {
+    background: #e8f5e9;
+    color: #1b5e20
+  }
+
+  .card-code {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: 1px
+  }
+
+  .card-body {
+    padding: 8px 14px 12px
+  }
+
+  .hotel-name {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-bottom: 2px
+  }
+
+  .guest-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary)
+  }
+
+  .date-range {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 2px
+  }
+
+  .progress-wrap {
+    margin: 12px 0 4px;
+    position: relative
+  }
+
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative
+  }
+
+  .progress-line {
+    position: absolute;
+    top: 11px;
+    left: 11px;
+    right: 11px;
+    height: 2px;
+    background: var(--color-border-tertiary);
+    z-index: 0
+  }
+
+  .progress-fill {
+    position: absolute;
+    top: 11px;
+    left: 11px;
+    height: 2px;
+    background: #42a5f5;
+    z-index: 1;
+    transition: width 0.3s
+  }
+
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+    position: relative
+  }
+
+  .step-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s
+  }
+
+  .step-circle.done {
+    background: #42a5f5;
+    border-color: #42a5f5;
+    color: white
+  }
+
+  .step-circle.active {
+    border-color: #42a5f5;
+    color: #42a5f5
+  }
+
+  .step-label {
+    font-size: 9px;
+    color: var(--color-text-tertiary);
+    text-align: center;
+    max-width: 50px;
+    line-height: 1.2
+  }
+
+  .checklist {
+    margin: 10px 0 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px
+  }
+
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer
+  }
+
+  .check-item input[type=checkbox] {
+    accent-color: #42a5f5;
+    width: 15px;
+    height: 15px;
+    cursor: pointer
+  }
+
+  .check-label {
+    font-size: 12px;
+    color: var(--color-text-primary)
+  }
+
+  .check-label.checked {
+    color: var(--color-text-secondary);
+    text-decoration: line-through
+  }
+
+  .notes-section {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 0.5px solid var(--color-border-tertiary)
+  }
+
+  .notes-header {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px
+  }
+
+  .notes-text {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    line-height: 1.5
+  }
+
+  .notes-input {
+    width: 100%;
+    font-size: 12px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    line-height: 1.5
+  }
+
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: calc(50% - 210px + 16px);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #1e88e5;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(30, 136, 229, 0.4);
+    z-index: 20;
+    transition: transform 0.2s
+  }
+
+  .fab:active {
+    transform: scale(0.93)
+  }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 30;
+    align-items: flex-end;
+    justify-content: center
+  }
+
+  .overlay.open {
+    display: flex
+  }
+
+  .modal {
+    background: var(--color-background-primary);
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--color-text-primary)
+  }
+
+  .form-group {
+    margin-bottom: 12px
+  }
+
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    display: block
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-primary);
+    font-size: 13px;
+    color: var(--color-text-primary);
+    outline: none;
+    font-family: inherit
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px
+  }
+
+  .modal-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px
+  }
+
+  .modal-tab {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 0.5px solid var(--color-border-secondary);
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all 0.2s
+  }
+
+  .modal-tab.active {
+    background: #1e88e5;
+    color: white;
+    border-color: #1e88e5
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    background: #1e88e5;
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px
+  }
+
+  .btn-close {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--color-text-secondary)
+  }
+
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--color-text-tertiary);
+    font-size: 13px
+  }
+
+  .card-menu {
+    float: right;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-tertiary);
+    font-size: 18px;
+    padding: 0 4px
+  }
+</style>
+<div class="app" id="app">
+  <div class="header">
+    <div class="header-top">
+      <span class="header-title">Booking Tracker</span>
+      <button class="icon-btn">&#128197;</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('travel')">TRAVEL</button>
+      <button class="tab" onclick="switchTab('sales')">SALES</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">&#128269;</span>
+      <input class="search-input" type="text" placeholder="Search..." oninput="renderCards()" id="searchInput">
+    </div>
+  </div>
+  <div class="cards" id="cardList"></div>
+</div>
+<button class="fab" onclick="openModal()">+</button>
+<div class="overlay" id="overlay" onclick="e=>{if(e.target===this)closeModal()}">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="btn-close" onclick="closeModal()">&#215;</button>
+    <div class="modal-title">Add Booking</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="setModalType('travel')">Travel</button>
+      <button class="modal-tab" onclick="setModalType('sales')">Sales</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Hotel Name</label>
+        <input class="form-input" id="fHotel" placeholder="e.g. Shangrila">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Code (3 letters)</label>
+        <input class="form-input" id="fCode" maxlength="3" placeholder="PTK" style="text-transform:uppercase">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Guest Name</label>
+      <input class="form-input" id="fGuest" placeholder="Full name">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Sales / VIC</label>
+        <input class="form-input" id="fSales" placeholder="e.g. Adri/VIC">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Dates</label>
+        <input class="form-input" id="fDates" placeholder="e.g. 8-10 May">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes</label>
+      <input class="form-input" id="fNotes" placeholder="Optional notes...">
+    </div>
+    <button class="btn-primary" onclick="addBooking()">Add Booking</button>
+  </div>
+</div>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, updateDoc, doc }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDDosVb2d6Z1cQvTOMURf4Dpiix_p-4itk",
+    authDomain: "piping-booking-tracker.firebaseapp.com",
+    projectId: "piping-booking-tracker",
+    storageBucket: "piping-booking-tracker.firebasestorage.app",
+    messagingSenderId: "6319069925",
+    appId: "1:6319069925:web:33c1a40d4e6401572b520c"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.db = db;
+  window.fb = { collection, addDoc, getDocs, updateDoc, doc };
+  let currentTab = 'travel', modalType = 'travel';
+  let bookings = {
+    travel: [],
+    sales: []
+  };
+  let nextId = 10;
+  const stepLabels = ['Follow-up', 'Sales Lead Approve', 'Issued'];
+  const checkLabels = ['User Approve', 'Booking', 'Get Confirmation Letter', 'Get Guarantee Letter', 'GL Approved', 'Send to Sales'];
+  function getTravelStatus(steps) {
+    if (steps[2]) return { label: 'ISSUED', cls: 'badge-issued' };
+    if (steps[1]) return { label: 'PENDING LEAD', cls: 'badge-pending-lead' };
+    if (steps[0]) return { label: 'PENDING LEAD', cls: 'badge-pending-lead' };
+    return { label: 'FOLLOW UP', cls: 'badge-pending-approve' };
+  }
+  async function loadBookings() {
+    bookings = { travel: [], sales: [] };
+
+    const snapshot = await fb.getDocs(fb.collection(db, "bookings"));
+
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      data.id = docSnap.id;
+
+      bookings[data.type].push(data);
+    });
+
+    renderCards();
+  }
+  function getSalesStatus(checks) {
+    if (checks[5]) return { label: 'ISSUED', cls: 'badge-issued' };
+    if (checks[4]) return { label: 'PENDING SEND', cls: 'badge-pending-send' };
+    if (checks[3]) return { label: 'GL APPROVE', cls: 'badge-gl-approve' };
+    if (checks[2]) return { label: 'PENDING GL', cls: 'badge-pending-gl' };
+    if (checks[1]) return { label: 'GETTING CL', cls: 'badge-getting-cl' };
+    return { label: 'PENDING APPROVE', cls: 'badge-pending-approve' };
+  }
+  function renderCards() {
+    const q = (document.getElementById('searchInput').value || '').toLowerCase();
+    const list = bookings[currentTab].filter(b => {
+      const s = (b.hotel + b.guest + b.sales + b.code).toLowerCase();
+      return s.includes(q);
+    });
+    const cont = document.getElementById('cardList');
+    if (!list.length) { cont.innerHTML = '<div class="empty">No bookings found</div>'; return; }
+    cont.innerHTML = list.map(b => currentTab === 'travel' ? renderTravel(b) : renderSales(b)).join('');
+  }
+  function renderTravel(b) {
+    const st = getTravelStatus(b.steps);
+    const done = b.steps.filter(Boolean).length;
+    const pct = done === 0 ? 0 : done === 1 ? 33 : done === 2 ? 66 : 100;
+    const stepsHtml = stepLabels.map((l, i) => `
+    <div class="step-item">
+      <div class="step-circle ${b.steps[i] ? 'done' : i === done ? 'active' : ''}" onclick="toggleStep(${b.id},${i})">${b.steps[i] ? '&#10003;' : i + 1}</div>
+      <span class="step-label">${l}</span>
+    </div>`).join('');
+    return `<div class="card">
+  <div class="card-header">
+    <div>
+      <span class="status-badge ${st.cls}">${st.label}</span>
+      <div class="hotel-name">${b.hotel}</div>
+    </div>
+    <div class="card-code">${b.code}</div>
+  </div>
+  <div class="card-body">
+    <div class="guest-name">${b.guest}</div>
+    <div class="date-range">${b.sales} &bull; ${b.dates}</div>
+    <div class="progress-wrap">
+      <div class="progress-steps">
+        <div class="progress-line"></div>
+        <div class="progress-fill" style="width:calc(${pct}% - 22px)"></div>
+        ${stepsHtml}
+      </div>
+    </div>
+    <div class="notes-section">
+      <div class="notes-header">&#9203; History</div>
+      <textarea class="notes-input" rows="2" onchange="updateNotes('travel',${b.id},this.value)">${b.notes}</textarea>
+    </div>
+  </div>
+</div>`;
+  }
+  function renderSales(b) {
+    const st = getSalesStatus(b.checks);
+    const checksHtml = checkLabels.map((l, i) => `
+    <label class="check-item">
+      <input type="checkbox" ${b.checks[i] ? 'checked' : ''} onchange="toggleCheck(${b.id},${i},this.checked)">
+      <span class="check-label ${b.checks[i] ? 'checked' : ''}">${l}</span>
+    </label>`).join('');
+    return `<div class="card">
+  <div class="card-header">
+    <div>
+      <span class="status-badge ${st.cls}">${st.label}</span>
+      <div class="hotel-name">${b.hotel}</div>
+    </div>
+    <div class="card-code">${b.code}</div>
+  </div>
+  <div class="card-body">
+    <div class="guest-name">${b.guest}</div>
+    <div class="date-range">${b.sales} &bull; ${b.dates}</div>
+    <div class="checklist">${checksHtml}</div>
+    <div class="notes-section">
+      <div class="notes-header">&#9203; Notes</div>
+      <textarea class="notes-input" rows="2" onchange="updateNotes('sales',${b.id},this.value)">${b.notes}</textarea>
+    </div>
+  </div>
+</div>`;
+  }
+  async function toggleStep(id, idx) {
+    const b = bookings.travel.find(x => x.id === id);
+    if (!b) return;
+    b.steps[idx] = !b.steps[idx];
+    await fb.updateDoc(fb.doc(db, "bookings", id), {
+      steps: b.steps
+    });
+    renderCards();
+  }
+  async function toggleCheck(id, idx, val) {
+    const b = bookings.sales.find(x => x.id === id);
+    if (!b) return;
+    b.checks[idx] = val;
+    await fb.updateDoc(fb.doc(db, "bookings", id), {
+      checks: b.checks
+    });
+    renderCards();
+  }
+  async function updateNotes(type, id, val) {
+    // const b = bookings[type].find(x => x.id === id);
+    // if (b) b.notes = val;
+    await fb.updateDoc(fb.doc(db, "bookings", id), {
+      notes: val
+    });
+  }
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (tab === 'travel' && i === 0) || (tab === 'sales' && i === 1)));
+    loadBookings();
+  }
+  function openModal() { document.getElementById('overlay').classList.add('open') }
+  function closeModal() { document.getElementById('overlay').classList.remove('open') }
+  function setModalType(t) {
+    modalType = t;
+    document.querySelectorAll('.modal-tab').forEach((b, i) => b.classList.toggle('active', (t === 'travel' && i === 0) || (t === 'sales' && i === 1)));
+  }
+  // function addBooking() {
+  //   const hotel = document.getElementById('fHotel').value.trim();
+  //   const code = document.getElementById('fCode').value.trim().toUpperCase();
+  //   const guest = document.getElementById('fGuest').value.trim();
+  //   const sales = document.getElementById('fSales').value.trim();
+  //   const dates = document.getElementById('fDates').value.trim();
+  //   const notes = document.getElementById('fNotes').value.trim();
+  //   if (!hotel || !code || !guest) return alert('Please fill Hotel, Code, and Guest Name');
+  //   const id = nextId++;
+  //   if (modalType === 'travel') {
+  //     bookings.travel.push({ id, hotel, code, guest, sales, dates, steps: [false, false, false], notes });
+  //   } else {
+  //     bookings.sales.push({ id, hotel, code, guest, sales, dates, checks: [false, false, false, false, false, false], notes });
+  //   }
+  //   ['fHotel', 'fCode', 'fGuest', 'fSales', 'fDates', 'fNotes'].forEach(id => document.getElementById(id).value = '');
+  //   closeModal();
+  //   currentTab = modalType;
+  //   switchTab(modalType);
+  // }
+  async function addBooking() {
+    const hotel = fHotel.value.trim();
+    const code = fCode.value.trim().toUpperCase();
+    const guest = fGuest.value.trim();
+    const sales = fSales.value.trim();
+    const dates = fDates.value.trim();
+    const notes = fNotes.value.trim();
+
+    if (!hotel || !code || !guest) return alert('Fill required');
+
+    const data = {
+      hotel, code, guest, sales, dates, notes,
+      type: modalType
+    };
+
+    if (modalType === 'travel') {
+      data.steps = [false, false, false];
+    } else {
+      data.checks = [false, false, false, false, false, false];
+    }
+
+    await fb.addDoc(fb.collection(db, "bookings"), data);
+
+    closeModal();
+    loadBookings(); // refresh
+  }
+  document.getElementById('overlay').addEventListener('click', function (e) { if (e.target === this) closeModal() });
+  loadBookings();
+</script>
