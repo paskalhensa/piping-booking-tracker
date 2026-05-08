@@ -801,7 +801,7 @@
     modalType = b.type;
 
     openModal();
-
+    const originalAddBooking = window.addBooking;
     // override addBooking temporarily
     window.addBooking = async function () {
       await fb.updateDoc(fb.doc(db, "bookings", id), {
