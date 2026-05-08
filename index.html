@@ -5,12 +5,25 @@
     padding: 0
   }
 
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f5f5;
+    --color-background-tertiary: #eeeeee;
+    --color-border-secondary: #cccccc;
+    --color-border-tertiary: #dddddd;
+    --color-text-primary: #212121;
+    --color-text-secondary: #757575;
+    --color-text-tertiary: #9e9e9e
+  }
+
   body {
     font-family: 'Segoe UI', sans-serif;
-    background: var(--color-background-tertiary)
+    background: var(--color-background-tertiary);
+    margin: 0;
   }
 
   .app {
+    width: 100%;
     max-width: 420px;
     margin: 0 auto;
     min-height: 100vh;
@@ -25,7 +38,7 @@
     border-bottom: 0.5px solid var(--color-border-tertiary);
     position: sticky;
     top: 0;
-    z-index: 10
+    z-index: 10;
   }
 
   .header-top {
@@ -387,6 +400,7 @@
 
   .modal {
     background: var(--color-background-primary);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
     border-radius: 16px 16px 0 0;
     padding: 20px;
     width: 100%;
@@ -545,7 +559,8 @@
       </div>
       <div class="form-group">
         <label class="form-label">Dates</label>
-        <input class="form-input" id="fDates" placeholder="e.g. 8-10 May">
+        <input type="date" id="fCheckIn">
+        <input type="date" id="fCheckOut">
       </div>
     </div>
     <div class="form-group">
@@ -618,7 +633,7 @@
     const list = bookings[currentTab].filter(b => {
       const s = (b.hotel + b.guest + b.sales + b.code).toLowerCase();
       return s.includes(q);
-    });
+    }).sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
     const cont = document.getElementById('cardList');
     if (!list.length) { cont.innerHTML = '<div class="empty">No bookings found</div>'; return; }
     cont.innerHTML = list.map(b => currentTab === 'travel' ? renderTravel(b) : renderSales(b)).join('');
@@ -642,7 +657,7 @@
   </div>
   <div class="card-body">
     <div class="guest-name">${b.guest}</div>
-    <div class="date-range">${b.sales} &bull; ${b.dates}</div>
+    <div class="date-range">${b.sales} &bull; ${formatDateRange(b.checkIn, b.checkOut)}</div>
     <div class="progress-wrap">
       <div class="progress-steps">
         <div class="progress-line"></div>
@@ -654,9 +669,11 @@
       <div class="notes-header">&#9203; History</div>
       <textarea class="notes-input" rows="2" onchange="updateNotes('travel','${b.id}',this.value)">${b.notes}</textarea>
     </div>
+    <button class="card-menu" onclick="editBooking('${b.id}')">✏️</button>
+<button class="card-menu" onclick="deleteBooking('${b.id}')">🗑️</button>
   </div>
 </div>`;
-    <button class="card-menu" onclick="deleteBooking('${b.id}')">🗑️</button>
+
   }
   function renderSales(b) {
     const st = getSalesStatus(b.checks);
@@ -675,15 +692,17 @@
   </div>
   <div class="card-body">
     <div class="guest-name">${b.guest}</div>
-    <div class="date-range">${b.sales} &bull; ${b.dates}</div>
+    <div class="date-range">${b.sales} &bull; ${formatDateRange(b.checkIn, b.checkOut)}</div>
     <div class="checklist">${checksHtml}</div>
     <div class="notes-section">
       <div class="notes-header">&#9203; Notes</div>
       <textarea class="notes-input" rows="2" onchange="updateNotes('sales','${b.id}',this.value)">${b.notes}</textarea>
     </div>
+    <button class="card-menu" onclick="editBooking('${b.id}')">✏️</button>
+<button class="card-menu" onclick="deleteBooking('${b.id}')">🗑️</button>
   </div>
 </div>`;
-    <button class="card-menu" onclick="deleteBooking('${b.id}')">🗑️</button>
+
   }
   async function toggleStep(id, idx) {
     const b = bookings.travel.find(x => x.id === id);
@@ -745,13 +764,14 @@
     const code = fCode.value.trim().toUpperCase();
     const guest = fGuest.value.trim();
     const sales = fSales.value.trim();
-    const dates = fDates.value.trim();
+    const checkIn = fCheckIn.value;
+    const checkOut = fCheckOut.value;
     const notes = fNotes.value.trim();
 
     if (!hotel || !code || !guest) return alert('Fill required');
 
     const data = {
-      hotel, code, guest, sales, dates, notes,
+      hotel, code, guest, sales, checkIn, checkOut, notes,
       type: modalType
     };
 
@@ -766,14 +786,57 @@
     closeModal();
     loadBookings(); // refresh
   }
+  async function editBooking(id) {
+    const b = [...bookings.travel, ...bookings.sales].find(x => x.id === id);
+    if (!b) return;
 
+    fHotel.value = b.hotel;
+    fCode.value = b.code;
+    fGuest.value = b.guest;
+    fSales.value = b.sales;
+    fCheckIn.value = b.checkIn || '';
+    fCheckOut.value = b.checkOut || '';
+    fNotes.value = b.notes || '';
+
+    modalType = b.type;
+
+    openModal();
+
+    // override addBooking temporarily
+    window.addBooking = async function () {
+      await fb.updateDoc(fb.doc(db, "bookings", id), {
+        hotel: fHotel.value,
+        code: fCode.value,
+        guest: fGuest.value,
+        sales: fSales.value,
+        checkIn: fCheckIn.value,
+        checkOut: fCheckOut.value,
+        notes: fNotes.value
+      });
+
+      closeModal();
+      loadBookings();
+
+      window.addBooking = originalAddBooking;
+    };
+  }
   async function deleteBooking(id) {
     if (!confirm("Delete this booking?")) return;
 
     await fb.deleteDoc(fb.doc(db, "bookings", id));
     loadBookings();
   }
+  function formatDateRange(checkIn, checkOut) {
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
 
+    const options = { day: 'numeric', month: 'short' };
+
+    const s = start.toLocaleDateString('en-GB', options);
+    const e = end.toLocaleDateString('en-GB', options);
+
+    return `${s} - ${e}`;
+  }
   document.getElementById('overlay').addEventListener('click', function (e) { if (e.target === this) closeModal() });
   loadBookings();
   window.switchTab = switchTab;
@@ -784,4 +847,7 @@
   window.toggleStep = toggleStep;
   window.toggleCheck = toggleCheck;
   window.updateNotes = updateNotes;
+  window.deleteBooking = deleteBooking;
+  window.formatDateRange = formatDateRange;
+  window.editBooking = editBooking;
 </script>
