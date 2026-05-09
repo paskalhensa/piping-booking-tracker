@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
 <style>
   * {
     box-sizing: border-box;
@@ -23,6 +25,16 @@
 
     .fab {
       right: 16px;
+    }
+
+    .header {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .cards {
+      padding-left: 8px;
+      padding-right: 8px;
     }
   }
 
@@ -625,8 +637,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Dates</label>
-        <input type="date" id="fCheckIn">
-        <input type="date" id="fCheckOut">
+        <input class="form-input" id="fDates" placeholder="Check-in → Check-out" readonly>
       </div>
     </div>
     <div class="form-group">
@@ -702,12 +713,12 @@
     }).sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
     const cont = document.getElementById('cardList');
     if (!list.length) { cont.innerHTML = '<div class="empty">No bookings found</div>'; return; }
-    cont.innerHTML = list.map(b => currentTab === 'travel' ? renderTravel(b) : renderSales(b)).join('');
+    cont.innerHTML = list.map(b => renderCard(b)).join('');
   }
-  function renderTravel(b) {
-    const st = getTravelStatus(b.steps);
-    const done = b.steps.filter(Boolean).length;
-    const pct = done === 0 ? 0 : done === 1 ? 33 : done === 2 ? 66 : 100;
+  function renderCard(b) {
+    // const st = getTravelStatus(b.steps);
+    // const done = b.steps.filter(Boolean).length;
+    // const pct = done === 0 ? 0 : done === 1 ? 33 : done === 2 ? 66 : 100;
     const logHtml = (b.log || []).map((e, i) => `
     <div class="log-entry">
       <span class="log-date">${e.date}</span>
@@ -715,11 +726,11 @@
     </div>`).join('');
     const lastAction = b.log && b.log.length ? b.log[b.log.length - 1].action : 'New';
 
-    const stepsHtml = stepLabels.map((l, i) => `
-    <div class="step-item">
-      <div class="step-circle ${b.steps[i] ? 'done' : i === done ? 'active' : ''}" onclick="toggleStep('${b.id}',${i})">${b.steps[i] ? '&#10003;' : i + 1}</div>
-      <span class="step-label">${l}</span>
-    </div>`).join('');
+    // const stepsHtml = stepLabels.map((l, i) => `
+    // <div class="step-item">
+    //   <div class="step-circle ${b.steps[i] ? 'done' : i === done ? 'active' : ''}" onclick="toggleStep('${b.id}',${i})">${b.steps[i] ? '&#10003;' : i + 1}</div>
+    //   <span class="step-label">${l}</span>
+    // </div>`).join('');
     return `<div class="card">
   <div class="card-header">
     <div>
@@ -740,35 +751,6 @@
     <div class="notes-section">
       <div class="notes-header">&#9203; History</div>
       <textarea class="notes-input" rows="2" onchange="updateNotes('travel','${b.id}',this.value)">${b.notes}</textarea>
-    </div>
-    <button class="card-menu" onclick="editBooking('${b.id}')">✏️</button>
-<button class="card-menu" onclick="deleteBooking('${b.id}')">🗑️</button>
-  </div>
-</div>`;
-
-  }
-  function renderSales(b) {
-    const st = getSalesStatus(b.checks);
-    const checksHtml = checkLabels.map((l, i) => `
-    <label class="check-item">
-      <input type="checkbox" ${b.checks[i] ? 'checked' : ''} onchange="toggleCheck('${b.id}',${i},this.checked)">
-      <span class="check-label ${b.checks[i] ? 'checked' : ''}">${l}</span>
-    </label>`).join('');
-    return `<div class="card">
-  <div class="card-header">
-    <div>
-      <span class="status-badge ${st.cls}">${st.label}</span>
-      <div class="hotel-name">${b.hotel}</div>
-    </div>
-    <div class="card-code">${b.code}</div>
-  </div>
-  <div class="card-body">
-    <div class="guest-name">${b.guest}</div>
-    <div class="date-range">${b.sales} &bull; ${formatDateRange(b.checkIn, b.checkOut)}</div>
-    <div class="checklist">${checksHtml}</div>
-    <div class="notes-section">
-      <div class="notes-header">&#9203; Notes</div>
-      <textarea class="notes-input" rows="2" onchange="updateNotes('sales','${b.id}',this.value)">${b.notes}</textarea>
     </div>
     <button class="card-menu" onclick="editBooking('${b.id}')">✏️</button>
 <button class="card-menu" onclick="deleteBooking('${b.id}')">🗑️</button>
@@ -817,8 +799,9 @@
     const code = fCode.value.trim().toUpperCase();
     const guest = fGuest.value.trim();
     const sales = fSales.value.trim();
-    const checkIn = fCheckIn.value;
-    const checkOut = fCheckOut.value;
+    const dates = fDates.value;
+    const checkIn = window._dateRange?.[0] ? toLocalISO(window._dateRange[0]) : '';
+    const checkOut = window._dateRange?.[1] ? toLocalISO(window._dateRange[1]) : '';
     const notes = fNotes.value.trim();
 
     if (!hotel || !code || !guest) return alert('Fill required');
@@ -847,8 +830,12 @@
     fCode.value = b.code;
     fGuest.value = b.guest;
     fSales.value = b.sales;
-    fCheckIn.value = b.checkIn || '';
-    fCheckOut.value = b.checkOut || '';
+    if (b.checkIn && b.checkOut) {
+      datePicker.setDate([
+        new Date(b.checkIn + 'T12:00:00'),
+        new Date(b.checkOut + 'T12:00:00')
+      ]);
+    }
     fNotes.value = b.notes || '';
 
     modalType = b.type;
@@ -862,8 +849,8 @@
         code: fCode.value,
         guest: fGuest.value,
         sales: fSales.value,
-        checkIn: fCheckIn.value,
-        checkOut: fCheckOut.value,
+        checkIn: window._dateRange?.[0] ? toLocalISO(window._dateRange[0]) : b.checkIn,
+        checkOut: window._dateRange?.[1] ? toLocalISO(window._dateRange[1]) : b.checkOut,
         notes: fNotes.value
       });
 
@@ -903,8 +890,20 @@
     b.log = log;
     renderCards();
   }
+  function toLocalISO(date) {
+    const offset = date.getTimezoneOffset();
+    const local = new Date(date.getTime() - offset * 60000);
+    return local.toISOString().split('T')[0];
+  }
   document.getElementById('overlay').addEventListener('click', function (e) { if (e.target === this) closeModal() });
   loadBookings();
+  const datePicker = flatpickr('#fDates', {
+    mode: 'range',
+    dateFormat: 'd M Y',
+    onChange(dates) {
+      window._dateRange = dates;
+    }
+  });
   window.switchTab = switchTab;
   window.openModal = openModal;
   window.closeModal = closeModal;
