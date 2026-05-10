@@ -497,9 +497,28 @@
   }
 
   .modal-tab.active {
-    background: #1e88e5;
     color: white;
-    border-color: #1e88e5
+  }
+
+  .modal-tab.active[onclick*="hotel"] {
+    background: #9e9e9e;
+    border-color: #9e9e9e;
+  }
+
+  .modal-tab.active[onclick*="mobil"] {
+    background: #e57373;
+    border-color: #e57373;
+  }
+
+  .modal-tab.active[onclick*="registrasi"] {
+    background: #f5c200;
+    border-color: #f5c200;
+    color: #4a3800;
+  }
+
+  .modal-tab.active[onclick*="tiket"] {
+    background: #66bb6a;
+    border-color: #66bb6a;
   }
 
   .btn-primary {
@@ -596,16 +615,58 @@
     font-size: 12px;
     cursor: pointer;
   }
+
+  .type-hotel {
+    background: #f5f5f5;
+    border: 0.5px solid #bdbdbd;
+  }
+
+  .type-mobil {
+    background: #fff0f0;
+    border: 0.5px solid #ef9a9a;
+  }
+
+  .type-registrasi {
+    background: #fff3a0;
+    border: 0.5px solid #f0b800;
+  }
+
+  .type-tiket {
+    background: #d4edda;
+    border: 0.5px solid #66bb6a;
+  }
+
+  .badge-hotel {
+    background: #f5f5f5;
+    color: #616161;
+  }
+
+  .badge-mobil {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  .badge-registrasi {
+    background: #fff8e1;
+    color: #f57f17;
+  }
+
+  .badge-tiket {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
 </style>
 <div class="app" id="app">
   <div class="header">
     <div class="header-top">
       <span class="header-title">Booking Tracker</span>
-      <button class="icon-btn">&#128197;</button>
+      <button class="icon-btn" id="historyBtn" onclick="toggleHistory()">&#128197;</button>
     </div>
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('travel')">TRAVEL</button>
-      <button class="tab" onclick="switchTab('sales')">SALES</button>
+      <button class="tab active" onclick="switchTab('hotel')">HOTEL</button>
+      <button class="tab" onclick="switchTab('mobil')">MOBIL</button>
+      <button class="tab" onclick="switchTab('registrasi')">REG</button>
+      <button class="tab" onclick="switchTab('tiket')">TIKET</button>
     </div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
@@ -620,31 +681,49 @@
     <button class="btn-close" onclick="closeModal()">&#215;</button>
     <div class="modal-title">Add Booking</div>
     <div class="modal-tabs">
-      <button class="modal-tab active" onclick="setModalType('travel')">Travel</button>
-      <button class="modal-tab" onclick="setModalType('sales')">Sales</button>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Hotel Name</label>
-        <input class="form-input" id="fHotel" placeholder="e.g. Shangrila">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Code (3 letters)</label>
-        <input class="form-input" id="fCode" maxlength="3" placeholder="PTK" style="text-transform:uppercase">
-      </div>
+      <button class="modal-tab active" onclick="setModalType('hotel')">Hotel</button>
+      <button class="modal-tab" onclick="setModalType('mobil')">Mobil</button>
+      <button class="modal-tab" onclick="setModalType('registrasi')">Registrasi</button>
+      <button class="modal-tab" onclick="setModalType('tiket')">Tiket</button>
     </div>
     <div class="form-group">
       <label class="form-label">Guest Name</label>
       <input class="form-input" id="fGuest" placeholder="Full name">
     </div>
     <div class="form-row">
+      <div class="form-group" id="fDatesWrap">
+        <label class="form-label">Dates</label>
+        <input class="form-input" id="fDates" placeholder="Check-in → Check-out" readonly>
+      </div>
       <div class="form-group">
-        <label class="form-label">Sales / VIC</label>
+        <label class="form-label" id="fHotelLabel">Hotel Name</label>
+        <input class="form-input" id="fHotel" placeholder="e.g. Shangrila">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Sales Name</label>
         <input class="form-input" id="fSales" placeholder="e.g. Adri/VIC">
       </div>
       <div class="form-group">
-        <label class="form-label">Dates</label>
-        <input class="form-input" id="fDates" placeholder="Check-in → Check-out" readonly>
+        <label class="form-label">Wil/Div</label>
+        <input class="form-input" id="fCode" placeholder="e.g. DPS/VIC">
+      </div>
+    </div>
+    <div id="tiketFields" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Pendamping</label>
+        <div id="pendampingList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" onclick="addPendampingRow()"
+          style="margin-top:6px;padding:6px 12px;border-radius:8px;border:0.5px dashed #bbb;background:transparent;color:#9e9e9e;cursor:pointer;font-size:12px;width:100%;">+
+          Add pendamping</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal</label>
+        <div id="tiketDateList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" onclick="addTiketDateRow()"
+          style="margin-top:6px;padding:6px 12px;border-radius:8px;border:0.5px dashed #bbb;background:transparent;color:#9e9e9e;cursor:pointer;font-size:12px;width:100%;">+
+          Add tanggal</button>
       </div>
     </div>
     <div class="form-group">
@@ -676,22 +755,19 @@
 
   window.db = db;
   window.fb = { collection, addDoc, getDocs, updateDoc, doc, deleteDoc };
-  let currentTab = 'travel', modalType = 'travel';
+  let currentTab = 'hotel', modalType = 'hotel';
   let bookings = {
-    travel: [],
-    sales: []
+    hotel: [],
+    mobil: [],
+    registrasi: [],
+    tiket: []
   };
   let nextId = 10;
-  const stepLabels = ['Follow-up', 'Sales Lead Approve', 'Issued'];
-  const checkLabels = ['User Approve', 'Booking', 'Get Confirmation Letter', 'Get Guarantee Letter', 'GL Approved', 'Send to Sales'];
-  function getTravelStatus(steps) {
-    if (steps[2]) return { label: 'ISSUED', cls: 'badge-issued' };
-    if (steps[1]) return { label: 'PENDING LEAD', cls: 'badge-pending-lead' };
-    if (steps[0]) return { label: 'PENDING LEAD', cls: 'badge-pending-lead' };
-    return { label: 'FOLLOW UP', cls: 'badge-pending-approve' };
-  }
+  let showingHistory = false;
+  let modalPendamping = [];
+  let modalTiketDates = [];
   async function loadBookings() {
-    bookings = { travel: [], sales: [] };
+    bookings = { hotel: [], mobil: [], registrasi: [], tiket: [] };
 
     const snapshot = await fb.getDocs(fb.collection(db, "bookings"));
 
@@ -699,65 +775,66 @@
       const data = docSnap.data();
       data.id = docSnap.id;
 
-      bookings[data.type].push(data);
+      if (bookings[data.type]) bookings[data.type].push(data);
     });
 
     renderCards();
-  }
-  function getSalesStatus(checks) {
-    if (checks[5]) return { label: 'ISSUED', cls: 'badge-issued' };
-    if (checks[4]) return { label: 'PENDING SEND', cls: 'badge-pending-send' };
-    if (checks[3]) return { label: 'GL APPROVE', cls: 'badge-gl-approve' };
-    if (checks[2]) return { label: 'PENDING GL', cls: 'badge-pending-gl' };
-    if (checks[1]) return { label: 'GETTING CL', cls: 'badge-getting-cl' };
-    return { label: 'PENDING APPROVE', cls: 'badge-pending-approve' };
   }
   function renderCards() {
     const q = (document.getElementById('searchInput').value || '').toLowerCase();
     const list = bookings[currentTab].filter(b => {
       const s = (b.hotel + b.guest + b.sales + b.code).toLowerCase();
-      return s.includes(q);
+      return s.includes(q) && !b.done;
     }).sort((a, b) => new Date(a.checkIn) - new Date(b.checkIn));
     const cont = document.getElementById('cardList');
     if (!list.length) { cont.innerHTML = '<div class="empty">No bookings found</div>'; return; }
     cont.innerHTML = list.map(b => renderCard(b)).join('');
+    setTimeout(() => {
+      document.querySelectorAll('.log-entry textarea').forEach(ta => {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+      });
+    }, 0);
   }
   function renderCard(b) {
-    // const st = getTravelStatus(b.steps);
-    // const done = b.steps.filter(Boolean).length;
-    // const pct = done === 0 ? 0 : done === 1 ? 33 : done === 2 ? 66 : 100;
-    const logHtml = (b.log || []).map((e, i) => `
+    const sortedLog = [...(b.log || [])]
+      .map((e, origIdx) => ({ ...e, origIdx }))
+      .sort((a, c) => a.date.localeCompare(c.date));
+    const logHtml = sortedLog.map((e, i) => `
     <div class="log-entry">
-      <span class="log-date">${e.date}</span>
-      <span>${e.action}</span>
+      <input type="date" value="${e.date}"
+        style="border:none;background:transparent;font-size:12px;color:var(--color-text-tertiary);width:115px;cursor:pointer;"
+        onclick="this.showPicker()"
+        onchange="updateLogEntry('${b.id}','${b.type}',${e.origIdx},'date',this.value)">
+      <textarea
+  style="border:none;background:transparent;font-size:12px;flex:1;outline:none;color:var(--color-text-primary);resize:none;overflow:hidden;min-height:18px;line-height:1.4;font-family:inherit;padding:0;"
+  oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+  onchange="updateLogEntry('${b.id}','${b.type}',${e.origIdx},'action',this.value)"
+    >${e.action}</textarea>
     </div>`).join('');
-    const lastAction = b.log && b.log.length ? b.log[b.log.length - 1].action : 'New';
 
-    // const stepsHtml = stepLabels.map((l, i) => `
-    // <div class="step-item">
-    //   <div class="step-circle ${b.steps[i] ? 'done' : i === done ? 'active' : ''}" onclick="toggleStep('${b.id}',${i})">${b.steps[i] ? '&#10003;' : i + 1}</div>
-    //   <span class="step-label">${l}</span>
-    // </div>`).join('');
-    return `<div class="card">
+    return `<div class="card type-${b.type}">
   <div class="card-header">
-    <div>
-      <span class="status-badge badge-pending-approve">${lastAction}</span>
-      <div class="hotel-name">${b.hotel}</div>
+    <div class="guest-name" style="font-size:15px;font-weight:600;">${b.guest}</div>
+    <input type="checkbox" title="Mark done" style="width:18px;height:18px;accent-color:#1e88e5;cursor:pointer;"
+      onchange="markDone('${b.id}','${b.type}',this.checked,this)">
     </div>
-    <div class="card-code">${b.code}</div>
-  </div>
   <div class="card-body">
-    <div class="guest-name">${b.guest}</div>
-    <div class="date-range">${b.sales} &bull; ${formatDateRange(b.checkIn, b.checkOut)}</div>
+    ${b.type === 'tiket' ? `
+    <div class="date-range">${(b.tiketDates || []).map(d => new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })).join(', ') || 'No dates'}</div>
+    ${(b.pendamping || []).length ? `<div class="hotel-name" style="margin-top:2px;">${b.pendamping.length} pendamping (${b.pendamping.join(' & ')})</div>` : ''}` : `
+    <div class="date-range">${formatDateRange(b.checkIn, b.checkOut)} &bull; ${b.hotel}</div>`}
+    <div class="hotel-name" style="margin-top:2px;">${b.sales} &mdash; ${b.code}</div>
     <div class="log-list">${logHtml}</div>
     <div class="log-add">
-      <input type="date" id="ld-${b.id}">
-      <input type="text" id="la-${b.id}" placeholder="Action...">
+      <input type="date" id="ld-${b.id}" onclick="this.showPicker()">
+      <input type="text" id="la-${b.id}" placeholder="Action..."
+        onkeydown="if(event.key==='Enter')addLogEntry('${b.id}','${b.type}')">
       <button onclick="addLogEntry('${b.id}','${b.type}')">+</button>
     </div>
     <div class="notes-section">
-      <div class="notes-header">&#9203; History</div>
-      <textarea class="notes-input" rows="2" onchange="updateNotes('travel','${b.id}',this.value)">${b.notes}</textarea>
+      <div class="notes-header">&#9203; Notes</div>
+      <textarea class="notes-input" rows="2" onchange="updateNotes('${b.type}','${b.id}',this.value)">${b.notes}</textarea>
     </div>
     <button class="card-menu" onclick="editBooking('${b.id}')">✏️</button>
 <button class="card-menu" onclick="deleteBooking('${b.id}')">🗑️</button>
@@ -765,41 +842,38 @@
 </div>`;
 
   }
-  async function toggleStep(id, idx) {
-    const b = bookings.travel.find(x => x.id === id);
-    if (!b) return;
-    b.steps[idx] = !b.steps[idx];
-    await fb.updateDoc(fb.doc(db, "bookings", id), {
-      steps: b.steps
-    });
-    renderCards();
-  }
-  async function toggleCheck(id, idx, val) {
-    const b = bookings.sales.find(x => x.id === id);
-    if (!b) return;
-    b.checks[idx] = val;
-    await fb.updateDoc(fb.doc(db, "bookings", id), {
-      checks: b.checks
-    });
-    renderCards();
-  }
   async function updateNotes(type, id, val) {
-    // const b = bookings[type].find(x => x.id === id);
-    // if (b) b.notes = val;
     await fb.updateDoc(fb.doc(db, "bookings", id), {
       notes: val
     });
   }
+  const TAB_ORDER = ['hotel', 'mobil', 'registrasi', 'tiket'];
   function switchTab(tab) {
     currentTab = tab;
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (tab === 'travel' && i === 0) || (tab === 'sales' && i === 1)));
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', TAB_ORDER[i] === tab));
     loadBookings();
   }
-  function openModal() { document.getElementById('overlay').classList.add('open') }
+  function openModal(keepData = false) {
+    if (!keepData) {
+      modalPendamping = [];
+      modalTiketDates = [];
+    }
+    renderPendampingList();
+    renderTiketDateList();
+    document.getElementById('overlay').classList.add('open');
+    setModalType(modalType);
+  }
   function closeModal() { document.getElementById('overlay').classList.remove('open') }
+  const TYPE_BG = { hotel: '#f5f5f5', mobil: '#fff0f0', registrasi: '#fff3a0', tiket: '#d4edda' }; const HOTEL_LABELS = { hotel: 'Hotel Name', mobil: 'Location', registrasi: 'Event', tiket: '' };
   function setModalType(t) {
     modalType = t;
-    document.querySelectorAll('.modal-tab').forEach((b, i) => b.classList.toggle('active', (t === 'travel' && i === 0) || (t === 'sales' && i === 1)));
+    document.querySelectorAll('.modal-tab').forEach((b, i) => b.classList.toggle('active', TAB_ORDER[i] === t));
+    document.querySelector('.modal').style.background = TYPE_BG[t] || 'white';
+    const isTiket = t === 'tiket';
+    document.getElementById('tiketFields').style.display = isTiket ? 'block' : 'none';
+    document.getElementById('fDatesWrap').style.display = isTiket ? 'none' : 'block';
+    document.querySelector('.form-row:has(#fHotel)').style.display = isTiket ? 'none' : 'grid';
+    document.getElementById('fHotelLabel').textContent = HOTEL_LABELS[t] || 'Hotel Name';
   }
   async function addBooking() {
     const hotel = fHotel.value.trim();
@@ -811,18 +885,22 @@
     const checkOut = window._dateRange?.[1] ? toLocalISO(window._dateRange[1]) : '';
     const notes = fNotes.value.trim();
 
+    if (modalType === 'tiket') {
+      if (!guest || !code) return alert('Fill required');
+      const data = {
+        hotel: '', pendamping: modalPendamping.filter(x => x.trim()), tiketDates: modalTiketDates.filter(x => x),
+        code, guest, sales, checkIn: '', checkOut: '', notes, type: 'tiket', log: []
+      };
+      await fb.addDoc(fb.collection(db, "bookings"), data);
+      closeModal();
+      loadBookings();
+      return;
+    }
     if (!hotel || !code || !guest) return alert('Fill required');
-
     const data = {
       hotel, code, guest, sales, checkIn, checkOut, notes,
       type: modalType, log: []
     };
-
-    // if (modalType === 'travel') {
-    //   data.steps = [false, false, false];
-    // } else {
-    //   data.checks = [false, false, false, false, false, false];
-    // }
 
     await fb.addDoc(fb.collection(db, "bookings"), data);
 
@@ -830,7 +908,7 @@
     loadBookings(); // refresh
   }
   async function editBooking(id) {
-    const b = [...bookings.travel, ...bookings.sales].find(x => x.id === id);
+    const b = [...bookings.hotel, ...bookings.mobil, ...bookings.registrasi, ...bookings.tiket].find(x => x.id === id);
     if (!b) return;
 
     fHotel.value = b.hotel;
@@ -846,20 +924,30 @@
     fNotes.value = b.notes || '';
 
     modalType = b.type;
-
-    openModal();
+    if (b.type === 'tiket') {
+      modalPendamping = [...(b.pendamping || [])];
+      modalTiketDates = [...(b.tiketDates || [])];
+    }
+    openModal(true);
+    if (b.type === 'tiket') {
+      renderPendampingList();
+      renderTiketDateList();
+    }
     const originalAddBooking = window.addBooking;
     // override addBooking temporarily
     window.addBooking = async function () {
-      await fb.updateDoc(fb.doc(db, "bookings", id), {
-        hotel: fHotel.value,
-        code: fCode.value,
-        guest: fGuest.value,
-        sales: fSales.value,
-        checkIn: window._dateRange?.[0] ? toLocalISO(window._dateRange[0]) : b.checkIn,
-        checkOut: window._dateRange?.[1] ? toLocalISO(window._dateRange[1]) : b.checkOut,
-        notes: fNotes.value
-      });
+      const updateData = modalType === 'tiket'
+        ? {
+          pendamping: modalPendamping.filter(x => x.trim()), tiketDates: modalTiketDates.filter(x => x),
+          code: fCode.value, guest: fGuest.value, sales: fSales.value, notes: fNotes.value, type: modalType
+        }
+        : {
+          hotel: fHotel.value, code: fCode.value, guest: fGuest.value, sales: fSales.value,
+          checkIn: window._dateRange?.[0] ? toLocalISO(window._dateRange[0]) : b.checkIn,
+          checkOut: window._dateRange?.[1] ? toLocalISO(window._dateRange[1]) : b.checkOut,
+          notes: fNotes.value, type: modalType
+        };
+      await fb.updateDoc(fb.doc(db, "bookings", id), updateData);
 
       closeModal();
       loadBookings();
@@ -892,7 +980,8 @@
     const b = bookings[type].find(x => x.id === id);
     if (!b) return;
 
-    const log = [...(b.log || []), { date: dateVal, action: actionVal }];
+    const log = [...(b.log || []), { date: dateVal, action: actionVal }]
+      .sort((a, b) => a.date.localeCompare(b.date));
     await fb.updateDoc(fb.doc(db, "bookings", id), { log });
     b.log = log;
     renderCards();
@@ -901,6 +990,111 @@
     const offset = date.getTimezoneOffset();
     const local = new Date(date.getTime() - offset * 60000);
     return local.toISOString().split('T')[0];
+  }
+  async function updateLogEntry(id, type, origIdx, field, val) {
+    const b = bookings[type].find(x => x.id === id);
+    if (!b) return;
+    b.log[origIdx][field] = val;
+    await fb.updateDoc(fb.doc(db, "bookings", id), { log: b.log });
+    renderCards();
+  }
+  async function markDone(id, type, val, el) {
+    if (val && !confirm("Mark this booking as done?")) { el.checked = false; return; };
+    if (!val && !confirm("Move this booking back to active?")) { el.checked = true; return; };
+    const b = bookings[type].find(x => x.id === id);
+    if (!b) return;
+    b.done = val;
+    b.doneAt = val ? new Date().toISOString().split('T')[0] : null;
+    await fb.updateDoc(fb.doc(db, "bookings", id), { done: val, doneAt: b.doneAt });
+    if (showingHistory) renderHistory(); else renderCards();
+  }
+  function renderHistory() {
+    const cont = document.getElementById('cardList');
+    const all = [...bookings.hotel, ...bookings.mobil, ...bookings.registrasi, ...bookings.tiket].filter(b => b.done);
+    if (!all.length) { cont.innerHTML = '<div class="empty">No completed bookings</div>'; return; }
+    cont.innerHTML = all
+      .sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''))
+      .map(b => `
+      <div class="card type-${b.type}" style="opacity:0.6;">
+        <div class="card-header">
+          <div>
+            <div class="guest-name" style="font-size:15px;font-weight:600;">${b.guest}</div>
+            <div style="font-size:10px;color:var(--color-text-tertiary);">Done ${b.doneAt || ''}</div>
+          </div>
+          <input type="checkbox" checked title="Mark undone" style="width:18px;height:18px;accent-color:#1e88e5;cursor:pointer;"
+            onchange="markDone('${b.id}','${b.type}',this.checked,this)">
+        </div>
+        <div class="card-body">
+          <div class="date-range">${formatDateRange(b.checkIn, b.checkOut)} &bull; ${b.hotel}</div>
+          <div class="hotel-name" style="margin-top:2px;">${b.sales} &mdash; ${b.code}</div>
+          ${(b.log && b.log.length) ? `
+          <div class="log-list" style="margin-top:8px;">
+            ${[...b.log].sort((a, c) => a.date.localeCompare(c.date)).map(e => `
+            <div class="log-entry">
+              <span style="font-size:12px;color:var(--color-text-tertiary);min-width:85px;">${e.date}</span>
+              <span style="font-size:12px;color:var(--color-text-primary);line-height:1.4;">${e.action}</span>
+            </div>`).join('')}
+            </div>` : ''}
+          </div>
+      </div>`).join('');
+  }
+  function toggleHistory() {
+    showingHistory = !showingHistory;
+    document.getElementById('historyBtn').style.background = showingHistory ? '#e3f2fd' : '';
+    document.getElementById('historyBtn').style.color = showingHistory ? '#1e88e5' : '';
+    if (showingHistory) renderHistory(); else renderCards();
+  }
+  async function changeType(id, oldType, newType) {
+    if (oldType === newType) return;
+    const b = bookings[oldType].find(x => x.id === id);
+    if (!b) return;
+    await fb.updateDoc(fb.doc(db, "bookings", id), { type: newType });
+    bookings[oldType] = bookings[oldType].filter(x => x.id !== id);
+    b.type = newType;
+    bookings[newType].push(b);
+    renderCards();
+  }
+  function renderPendampingList() {
+    const list = document.getElementById('pendampingList');
+    list.innerHTML = modalPendamping.map((p, i) => `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input class="form-input" value="${p.replace(/"/g, '&quot;')}" placeholder="e.g. Istri"
+          oninput="updatePendamping(${i},this.value)"
+          style="flex:1;">
+        <button onclick="removePendampingRow(${i})" style="border:none;background:none;color:#9e9e9e;cursor:pointer;font-size:16px;padding:0 4px;">✕</button>
+      </div>`).join('');
+  }
+  function updatePendamping(i, val) { modalPendamping[i] = val; }
+  function addPendampingRow() {
+    modalPendamping.push('');
+    renderPendampingList();
+    const inputs = document.querySelectorAll('#pendampingList input');
+    inputs[inputs.length - 1]?.focus();
+  }
+  function removePendampingRow(i) {
+    modalPendamping.splice(i, 1);
+    renderPendampingList();
+  }
+  function renderTiketDateList() {
+    const list = document.getElementById('tiketDateList');
+    list.innerHTML = modalTiketDates.map((d, i) => `
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input class="form-input" type="date" value="${d}" onclick="this.showPicker()"
+          onchange="updateTiketDate(${i},this.value)"
+          style="flex:1;">
+        <button onclick="removeTiketDateRow(${i})" style="border:none;background:none;color:#9e9e9e;cursor:pointer;font-size:16px;padding:0 4px;">✕</button>
+      </div>`).join('');
+  }
+  function updateTiketDate(i, val) { modalTiketDates[i] = val; }
+  function addTiketDateRow() {
+    modalTiketDates.push('');
+    renderTiketDateList();
+    const inputs = document.querySelectorAll('#tiketDateList input');
+    inputs[inputs.length - 1]?.showPicker();
+  }
+  function removeTiketDateRow(i) {
+    modalTiketDates.splice(i, 1);
+    renderTiketDateList();
   }
   document.getElementById('overlay').addEventListener('click', function (e) { if (e.target === this) closeModal() });
   loadBookings();
@@ -916,13 +1110,21 @@
   window.closeModal = closeModal;
   window.setModalType = setModalType;
   window.addBooking = addBooking;
-  window.toggleStep = toggleStep;
-  window.toggleCheck = toggleCheck;
   window.updateNotes = updateNotes;
   window.deleteBooking = deleteBooking;
   window.formatDateRange = formatDateRange;
   window.editBooking = editBooking;
   window.addLogEntry = addLogEntry;
+  window.updateLogEntry = updateLogEntry;
+  window.markDone = markDone;
+  window.renderHistory = renderHistory;
+  window.toggleHistory = toggleHistory;
+  window.addPendampingRow = addPendampingRow;
+  window.removePendampingRow = removePendampingRow;
+  window.updatePendamping = updatePendamping;
+  window.addTiketDateRow = addTiketDateRow;
+  window.removeTiketDateRow = removeTiketDateRow;
+  window.updateTiketDate = updateTiketDate;
 </script>
 
 </html>
