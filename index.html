@@ -56,7 +56,7 @@
     max-width: 420px;
     margin: 0 auto;
     min-height: 100vh;
-    display: flex;
+    display: none;
     flex-direction: column;
     position: relative
   }
@@ -175,57 +175,6 @@
     justify-content: space-between
   }
 
-  .status-badge {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px
-  }
-
-  .badge-issued {
-    background: #e8f5e9;
-    color: #2e7d32
-  }
-
-  .badge-pending-lead {
-    background: #fff8e1;
-    color: #f57f17
-  }
-
-  .badge-getting-cl {
-    background: #fff8e1;
-    color: #e65100
-  }
-
-  .badge-pending-gl {
-    background: #fff3e0;
-    color: #bf360c
-  }
-
-  .badge-pending-approve {
-    background: #f3e5f5;
-    color: #6a1b9a
-  }
-
-  .badge-gl-approve {
-    background: #e3f2fd;
-    color: #0d47a1
-  }
-
-  .badge-pending-send {
-    background: #e8f5e9;
-    color: #1b5e20
-  }
-
-  .card-code {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    letter-spacing: 1px
-  }
-
   .card-body {
     padding: 8px 14px 12px
   }
@@ -248,111 +197,6 @@
     margin-top: 2px
   }
 
-  .progress-wrap {
-    margin: 12px 0 4px;
-    position: relative
-  }
-
-  .progress-steps {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative
-  }
-
-  .progress-line {
-    position: absolute;
-    top: 11px;
-    left: 11px;
-    right: 11px;
-    height: 2px;
-    background: var(--color-border-tertiary);
-    z-index: 0
-  }
-
-  .progress-fill {
-    position: absolute;
-    top: 11px;
-    left: 11px;
-    height: 2px;
-    background: #42a5f5;
-    z-index: 1;
-    transition: width 0.3s
-  }
-
-  .step-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    z-index: 2;
-    position: relative
-  }
-
-  .step-circle {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 2px solid var(--color-border-secondary);
-    background: var(--color-background-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    cursor: pointer;
-    transition: all 0.2s
-  }
-
-  .step-circle.done {
-    background: #42a5f5;
-    border-color: #42a5f5;
-    color: white
-  }
-
-  .step-circle.active {
-    border-color: #42a5f5;
-    color: #42a5f5
-  }
-
-  .step-label {
-    font-size: 9px;
-    color: var(--color-text-tertiary);
-    text-align: center;
-    max-width: 50px;
-    line-height: 1.2
-  }
-
-  .checklist {
-    margin: 10px 0 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px
-  }
-
-  .check-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer
-  }
-
-  .check-item input[type=checkbox] {
-    accent-color: #42a5f5;
-    width: 15px;
-    height: 15px;
-    cursor: pointer
-  }
-
-  .check-label {
-    font-size: 12px;
-    color: var(--color-text-primary)
-  }
-
-  .check-label.checked {
-    color: var(--color-text-secondary);
-    text-decoration: line-through
-  }
-
   .notes-section {
     margin-top: 8px;
     padding-top: 8px;
@@ -369,12 +213,6 @@
     display: flex;
     align-items: center;
     gap: 4px
-  }
-
-  .notes-text {
-    font-size: 12px;
-    color: var(--color-text-secondary);
-    line-height: 1.5
   }
 
   .notes-input {
@@ -575,12 +413,6 @@
     color: var(--color-text-primary);
   }
 
-  .log-date {
-    color: var(--color-text-tertiary);
-    white-space: nowrap;
-    min-width: 70px;
-  }
-
   .log-add {
     display: flex;
     gap: 6px;
@@ -752,8 +584,6 @@
     <div class="header-top">
       <span class="header-title">Booking Tracker</span>
       <div style="display:flex;gap:6px;align-items:center;">
-        <button class="icon-btn" onclick="handleSignOut()" title="Sign out" id="signOutBtn"
-          style="display:none;">🚪</button>
         <button class="icon-btn" id="historyBtn" onclick="toggleHistory()">&#128197;</button>
         <div style="position:relative;">
           <button class="icon-btn" onclick="toggleDataMenu()" title="Data options">&#8942;</button>
@@ -768,6 +598,12 @@
               📥 Import data
               <input type="file" accept=".json" onchange="importData(event);toggleDataMenu()" style="display:none;">
             </label>
+            <div style="height:0.5px;background:var(--color-border-tertiary);"></div>
+
+            <button onclick="handleSignOut();toggleDataMenu()"
+              style="width:100%;padding:11px 14px;border:none;background:none;text-align:left;font-size:13px;cursor:pointer;color:#c62828;display:flex;align-items:center;gap:8px;">
+              🚪 Sign out
+            </button>
           </div>
         </div>
       </div>
@@ -880,13 +716,16 @@
 
   // Auth state
   onAuthStateChanged(auth, user => {
+    const appEl = document.getElementById('app');
+    const loginEl = document.getElementById('loginScreen');
+
     if (user) {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('signOutBtn').style.display = 'flex';
+      loginEl.style.display = 'none';
+      appEl.style.display = 'flex';
       loadBookings();
     } else {
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('signOutBtn').style.display = 'none';
+      loginEl.style.display = 'flex';
+      appEl.style.display = 'none';
     }
   });
 
@@ -906,28 +745,23 @@
     registrasi: [],
     tiket: []
   };
-  let nextId = 10;
   let showingHistory = false;
   let modalPendamping = [];
   let modalTiketDates = [];
   async function loadBookings() {
-    try {
-      bookings = { hotel: [], mobil: [], registrasi: [], tiket: [] };
+    bookings = { hotel: [], mobil: [], registrasi: [], tiket: [] };
 
-      const snapshot = await fb.getDocs(fb.collection(db, "bookings"));
+    const snapshot = await fb.getDocs(fb.collection(db, "bookings"));
 
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        data.id = docSnap.id;
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      data.id = docSnap.id;
 
-        if (bookings[data.type]) bookings[data.type].push(data);
-      });
+      if (bookings[data.type]) bookings[data.type].push(data);
+    });
 
-      if (showingHistory) renderHistory(); else renderCards();
-    } catch (e) {
-      await signOut(auth);
-      alert('Access denied. Your account is not authorized.');
-    }
+    if (showingHistory) renderHistory(); else renderCards();
+
   }
   function renderCards() {
     const q = (document.getElementById('searchInput').value || '').toLowerCase();
@@ -1029,7 +863,6 @@
     const code = fCode.value.trim().toUpperCase();
     const guest = fGuest.value.trim();
     const sales = fSales.value.trim();
-    const dates = fDates.value;
     const checkIn = window._dateRange?.[0] ? toLocalISO(window._dateRange[0]) : '';
     const checkOut = window._dateRange?.[1] ? toLocalISO(window._dateRange[1]) : '';
     const notes = fNotes.value.trim();
@@ -1197,16 +1030,6 @@
     document.getElementById('historyBtn').style.color = showingHistory ? '#1e88e5' : '';
     if (showingHistory) renderHistory(); else renderCards();
   }
-  async function changeType(id, oldType, newType) {
-    if (oldType === newType) return;
-    const b = bookings[oldType].find(x => x.id === id);
-    if (!b) return;
-    await fb.updateDoc(fb.doc(db, "bookings", id), { type: newType });
-    bookings[oldType] = bookings[oldType].filter(x => x.id !== id);
-    b.type = newType;
-    bookings[newType].push(b);
-    renderCards();
-  }
   function renderPendampingList() {
     const list = document.getElementById('pendampingList');
     list.innerHTML = modalPendamping.map((p, i) => `
@@ -1339,6 +1162,7 @@
   window.handleSearch = handleSearch;
   window.toggleDataMenu = toggleDataMenu;
   window.signInWithGoogle = signInWithGoogle;
-  </script>
+  window.handleSignOut = handleSignOut;
+</script>
 
 </html>
