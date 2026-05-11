@@ -660,7 +660,24 @@
   <div class="header">
     <div class="header-top">
       <span class="header-title">Booking Tracker</span>
-      <button class="icon-btn" id="historyBtn" onclick="toggleHistory()">&#128197;</button>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="icon-btn" id="historyBtn" onclick="toggleHistory()">&#128197;</button>
+        <div style="position:relative;">
+          <button class="icon-btn" onclick="toggleDataMenu()" title="Data options">&#8942;</button>
+          <div id="dataMenu"
+            style="display:none;position:absolute;right:0;top:42px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.12);z-index:50;min-width:150px;overflow:hidden;">
+            <button onclick="exportData();toggleDataMenu()"
+              style="width:100%;padding:11px 14px;border:none;background:none;text-align:left;font-size:13px;cursor:pointer;color:var(--color-text-primary);display:flex;align-items:center;gap:8px;">📤
+              Export data</button>
+            <div style="height:0.5px;background:var(--color-border-tertiary);"></div>
+            <label
+              style="width:100%;padding:11px 14px;border:none;background:none;text-align:left;font-size:13px;cursor:pointer;color:var(--color-text-primary);display:flex;align-items:center;gap:8px;box-sizing:border-box;">
+              📥 Import data
+              <input type="file" accept=".json" onchange="importData(event);toggleDataMenu()" style="display:none;">
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="tabs">
       <button class="tab active" onclick="switchTab('hotel')">HOTEL</button>
@@ -670,7 +687,7 @@
     </div>
     <div class="search-wrap">
       <span class="search-icon">&#128269;</span>
-      <input class="search-input" type="text" placeholder="Search..." oninput="renderCards()" id="searchInput">
+      <input class="search-input" type="text" placeholder="Search..." oninput="handleSearch()" id="searchInput">
     </div>
   </div>
   <div class="cards" id="cardList"></div>
@@ -778,7 +795,7 @@
       if (bookings[data.type]) bookings[data.type].push(data);
     });
 
-    renderCards();
+    if (showingHistory) renderHistory(); else renderCards();
   }
   function renderCards() {
     const q = (document.getElementById('searchInput').value || '').toLowerCase();
@@ -1010,7 +1027,11 @@
   }
   function renderHistory() {
     const cont = document.getElementById('cardList');
-    const all = [...bookings.hotel, ...bookings.mobil, ...bookings.registrasi, ...bookings.tiket].filter(b => b.done);
+    const q = (document.getElementById('searchInput').value || '').toLowerCase();
+    const all = bookings[currentTab].filter(b => {
+      const s = (b.hotel + b.guest + b.sales + b.code).toLowerCase();
+      return b.done && s.includes(q);
+    });
     if (!all.length) { cont.innerHTML = '<div class="empty">No completed bookings</div>'; return; }
     cont.innerHTML = all
       .sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''))
@@ -1096,6 +1117,62 @@
     modalTiketDates.splice(i, 1);
     renderTiketDateList();
   }
+  function exportData() {
+    const all = [
+      ...bookings.hotel,
+      ...bookings.mobil,
+      ...bookings.registrasi,
+      ...bookings.tiket
+    ].map(({ id, ...rest }) => rest); // strip Firestore IDs
+    const json = JSON.stringify(all, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookings-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!confirm("This will ADD all bookings from the file (no duplicates removed). Continue?")) {
+      e.target.value = ''; return;
+    }
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!Array.isArray(data)) throw new Error('Invalid format');
+      let count = 0;
+      for (const entry of data) {
+        if (!entry.type || !entry.guest) continue; // skip malformed
+        await fb.addDoc(fb.collection(db, "bookings"), entry);
+        count++;
+      }
+      alert(`Imported ${count} bookings.`);
+      e.target.value = '';
+      loadBookings();
+    } catch (err) {
+      alert('Import failed: ' + err.message);
+      e.target.value = '';
+    }
+  }
+  function handleSearch() {
+    if (showingHistory) renderHistory(); else renderCards();
+  }
+
+  function toggleDataMenu() {
+    const m = document.getElementById('dataMenu');
+    m.style.display = m.style.display === 'none' ? 'block' : 'none';
+  }
+
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#dataMenu') && !e.target.closest('.icon-btn[onclick*="toggleDataMenu"]')) {
+      const m = document.getElementById('dataMenu');
+      if (m) m.style.display = 'none';
+    }
+  });
   document.getElementById('overlay').addEventListener('click', function (e) { if (e.target === this) closeModal() });
   loadBookings();
   const datePicker = flatpickr('#fDates', {
@@ -1125,6 +1202,10 @@
   window.addTiketDateRow = addTiketDateRow;
   window.removeTiketDateRow = removeTiketDateRow;
   window.updateTiketDate = updateTiketDate;
+  window.exportData = exportData;
+  window.importData = importData;
+  window.handleSearch = handleSearch;
+  window.toggleDataMenu = toggleDataMenu;
 </script>
 
 </html>
