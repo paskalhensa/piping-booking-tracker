@@ -866,16 +866,16 @@
     const checkIn = window._dateRange?.[0] ? toLocalISO(window._dateRange[0]) : '';
     const checkOut = window._dateRange?.[1] ? toLocalISO(window._dateRange[1]) : '';
     const notes = fNotes.value.trim();
-
+    let data;
     if (modalType === 'tiket') {
       if (!guest || !code) return alert('Fill required');
-      const data = {
+      data = {
         hotel: '', pendamping: modalPendamping.filter(x => x.trim()), tiketDates: modalTiketDates.filter(x => x),
         code, guest, sales, checkIn: '', checkOut: '', notes, type: 'tiket', log: []
       };
     } else {
       if (!hotel || !code || !guest) return alert('Fill required');
-      const data = {
+      data = {
         hotel, code, guest, sales, checkIn, checkOut, notes,
         type: modalType, log: []
       };
