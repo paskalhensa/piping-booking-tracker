@@ -826,7 +826,7 @@
 
   }
   async function updateNotes(type, id, val) {
-    await fb.updateDoc(fb.doc(db, "bookings", id), {
+    fb.updateDoc(fb.doc(db, "bookings", id), {
       notes: val
     });
   }
@@ -873,21 +873,18 @@
         hotel: '', pendamping: modalPendamping.filter(x => x.trim()), tiketDates: modalTiketDates.filter(x => x),
         code, guest, sales, checkIn: '', checkOut: '', notes, type: 'tiket', log: []
       };
-      await fb.addDoc(fb.collection(db, "bookings"), data);
-      closeModal();
-      loadBookings();
-      return;
+    } else {
+      if (!hotel || !code || !guest) return alert('Fill required');
+      const data = {
+        hotel, code, guest, sales, checkIn, checkOut, notes,
+        type: modalType, log: []
+      };
     }
-    if (!hotel || !code || !guest) return alert('Fill required');
-    const data = {
-      hotel, code, guest, sales, checkIn, checkOut, notes,
-      type: modalType, log: []
-    };
-
-    await fb.addDoc(fb.collection(db, "bookings"), data);
-
+    const docRef = await fb.addDoc(fb.collection(db, "bookings"), data);
+    data.id = docRef.id;
+    bookings[modalType].push(data);
     closeModal();
-    loadBookings(); // refresh
+    renderCards();
   }
   async function editBooking(id) {
     const b = [...bookings.hotel, ...bookings.mobil, ...bookings.registrasi, ...bookings.tiket].find(x => x.id === id);
@@ -964,9 +961,12 @@
 
     const log = [...(b.log || []), { date: dateVal, action: actionVal }]
       .sort((a, b) => a.date.localeCompare(b.date));
-    await fb.updateDoc(fb.doc(db, "bookings", id), { log });
+    //await fb.updateDoc(fb.doc(db, "bookings", id), { log });
+    document.getElementById('ld-' + id).value = '';
+    document.getElementById('la-' + id).value = '';
     b.log = log;
     renderCards();
+    fb.updateDoc(fb.doc(db, "bookings", id), { log });
   }
   function toLocalISO(date) {
     const offset = date.getTimezoneOffset();
@@ -977,8 +977,8 @@
     const b = bookings[type].find(x => x.id === id);
     if (!b) return;
     b.log[origIdx][field] = val;
-    await fb.updateDoc(fb.doc(db, "bookings", id), { log: b.log });
-    renderCards();
+    fb.updateDoc(fb.doc(db, "bookings", id), { log: b.log });
+    // renderCards();
   }
   async function markDone(id, type, val, el) {
     if (val && !confirm("Mark this booking as done?")) { el.checked = false; return; };
@@ -987,8 +987,8 @@
     if (!b) return;
     b.done = val;
     b.doneAt = val ? new Date().toISOString().split('T')[0] : null;
-    await fb.updateDoc(fb.doc(db, "bookings", id), { done: val, doneAt: b.doneAt });
     if (showingHistory) renderHistory(); else renderCards();
+    fb.updateDoc(fb.doc(db, "bookings", id), { done: val, doneAt: b.doneAt });
   }
   function renderHistory() {
     const cont = document.getElementById('cardList');
