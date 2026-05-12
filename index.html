@@ -961,7 +961,6 @@
 
     const log = [...(b.log || []), { date: dateVal, action: actionVal }]
       .sort((a, b) => a.date.localeCompare(b.date));
-    //await fb.updateDoc(fb.doc(db, "bookings", id), { log });
     document.getElementById('ld-' + id).value = '';
     document.getElementById('la-' + id).value = '';
     b.log = log;
@@ -978,7 +977,6 @@
     if (!b) return;
     b.log[origIdx][field] = val;
     fb.updateDoc(fb.doc(db, "bookings", id), { log: b.log });
-    // renderCards();
   }
   async function markDone(id, type, val, el) {
     if (val && !confirm("Mark this booking as done?")) { el.checked = false; return; };
@@ -1129,7 +1127,6 @@
     }
   });
   document.getElementById('overlay').addEventListener('click', function (e) { if (e.target === this) closeModal() });
-  loadBookings();
   const datePicker = flatpickr('#fDates', {
     mode: 'range',
     dateFormat: 'd M Y',
