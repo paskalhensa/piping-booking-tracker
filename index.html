@@ -605,6 +605,10 @@
               <input type="file" accept=".json" onchange="importData(event);toggleDataMenu()" style="display:none;">
             </label>
             <div style="height:0.5px;background:var(--color-border-tertiary);"></div>
+            <button onclick="exportDocx();toggleDataMenu()"
+              style="width:100%;padding:11px 14px;border:none;background:none;text-align:left;font-size:13px;cursor:pointer;color:var(--color-text-primary);display:flex;align-items:center;gap:8px;">📄
+              Export as Word</button>
+            <div style="height:0.5px;background:var(--color-border-tertiary);"></div>
 
             <button onclick="handleSignOut();toggleDataMenu()"
               style="width:100%;padding:11px 14px;border:none;background:none;text-align:left;font-size:13px;cursor:pointer;color:#c62828;display:flex;align-items:center;gap:8px;">
@@ -1140,6 +1144,163 @@
       window._dateRange = dates;
     }
   });
+  async function exportDocx() {
+    // Load docx library from CDN
+    if (!window.docx) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+    const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+      HeadingLevel, AlignmentType, BorderStyle, WidthType, ShadingType } = window.docx;
+
+    const border = { style: BorderStyle.SINGLE, size: 1, color: "CCCCCC" };
+    const borders = { top: border, bottom: border, left: border, right: border };
+    const cellMargins = { top: 80, bottom: 80, left: 120, right: 120 };
+
+    function makeHeaderRow(labels, colWidths) {
+      return new TableRow({
+        children: labels.map((label, i) => new TableCell({
+          borders, margins: cellMargins,
+          width: { size: colWidths[i], type: WidthType.DXA },
+          shading: { fill: "1e88e5", type: ShadingType.CLEAR },
+          children: [new Paragraph({
+            children: [new TextRun({ text: label, bold: true, color: "FFFFFF", size: 22 })]
+          })]
+        }))
+      });
+    }
+
+    function makeDataRow(values, colWidths) {
+      return new TableRow({
+        children: values.map((val, i) => new TableCell({
+          borders, margins: cellMargins,
+          width: { size: colWidths[i], type: WidthType.DXA },
+          children: [new Paragraph({ children: [new TextRun({ text: val || '—', size: 20 })] })]
+        }))
+      });
+    }
+
+    function sectionHeading(text) {
+      return new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        spacing: { before: 300, after: 120 },
+        children: [new TextRun({ text, bold: true, size: 28 })]
+      });
+    }
+
+    function noDataPara() {
+      return new Paragraph({ children: [new TextRun({ text: 'No entries.', italics: true, color: "999999", size: 20 })] });
+    }
+
+    const children = [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 200 },
+        children: [new TextRun({ text: 'Booking Tracker — Export', bold: true, size: 36 })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 },
+        children: [new TextRun({ text: `Generated: ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`, size: 20, color: "777777" })]
+      }),
+    ];
+
+    // HOTEL
+    children.push(sectionHeading('🏨 Hotel'));
+    const hotels = bookings.hotel.filter(b => !b.done);
+    if (hotels.length) {
+      const cols = [1400, 2400, 1400, 1400, 1400, 1760];
+      children.push(new Table({
+        width: { size: 9360, type: WidthType.DXA }, columnWidths: cols,
+        rows: [
+          makeHeaderRow(['Guest', 'Dates', 'Hotel', 'Sales', 'Wil/Div', 'Notes'], cols),
+          ...hotels.sort((a, b) => (a.checkIn || '').localeCompare(b.checkIn || '')).map(b =>
+            makeDataRow([b.guest, `${b.checkIn} → ${b.checkOut}`, b.hotel, b.sales, b.code, b.notes], cols)
+          )
+        ]
+      }));
+    } else children.push(noDataPara());
+
+    // MOBIL
+    children.push(sectionHeading('🚗 Mobil'));
+    const mobils = bookings.mobil.filter(b => !b.done);
+    if (mobils.length) {
+      const cols = [1400, 2400, 1800, 1400, 1400, 960];
+      children.push(new Table({
+        width: { size: 9360, type: WidthType.DXA }, columnWidths: cols,
+        rows: [
+          makeHeaderRow(['Guest', 'Dates', 'Location', 'Sales', 'Wil/Div', 'Notes'], cols),
+          ...mobils.sort((a, b) => (a.checkIn || '').localeCompare(b.checkIn || '')).map(b =>
+            makeDataRow([b.guest, `${b.checkIn} → ${b.checkOut}`, b.hotel, b.sales, b.code, b.notes], cols)
+          )
+        ]
+      }));
+    } else children.push(noDataPara());
+
+    // REGISTRASI
+    children.push(sectionHeading('📋 Registrasi'));
+    const regs = bookings.registrasi.filter(b => !b.done);
+    if (regs.length) {
+      const cols = [1800, 2000, 1760, 1400, 1400, 1000];
+      children.push(new Table({
+        width: { size: 9360, type: WidthType.DXA }, columnWidths: cols,
+        rows: [
+          makeHeaderRow(['Guest', 'Dates', 'Event', 'Sales', 'Wil/Div', 'Notes'], cols),
+          ...regs.sort((a, b) => (a.checkIn || '').localeCompare(b.checkIn || '')).map(b =>
+            makeDataRow([b.guest, `${b.checkIn} → ${b.checkOut}`, b.hotel, b.sales, b.code, b.notes], cols)
+          )
+        ]
+      }));
+    } else children.push(noDataPara());
+
+    // TIKET
+    children.push(sectionHeading('🎫 Tiket'));
+    const tikets = bookings.tiket.filter(b => !b.done);
+    if (tikets.length) {
+      const cols = [2000, 2200, 1760, 1400, 1000, 1000];
+      children.push(new Table({
+        width: { size: 9360, type: WidthType.DXA }, columnWidths: cols,
+        rows: [
+          makeHeaderRow(['Guest', 'Tanggal', 'Pendamping', 'Sales', 'Wil/Div', 'Notes'], cols),
+          ...tikets.map(b =>
+            makeDataRow([b.guest, (b.tiketDates || []).join(', '), (b.pendamping || []).join(', '), b.sales, b.code, b.notes], cols)
+          )
+        ]
+      }));
+    } else children.push(noDataPara());
+
+    const doc = new Document({
+      styles: {
+        default: { document: { run: { font: "Arial", size: 22 } } },
+        paragraphStyles: [
+          {
+            id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", quickFormat: true,
+            run: { size: 28, bold: true, font: "Arial", color: "1e88e5" },
+            paragraph: { spacing: { before: 300, after: 120 }, outlineLevel: 0 }
+          }
+        ]
+      },
+      sections: [{
+        properties: {
+          page: { size: { width: 12240, height: 15840 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } }
+        },
+        children
+      }]
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bookings-${new Date().toISOString().slice(0, 10)}.docx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
   window.switchTab = switchTab;
   window.openModal = openModal;
   window.closeModal = closeModal;
@@ -1166,6 +1327,7 @@
   window.toggleDataMenu = toggleDataMenu;
   window.signInWithGoogle = signInWithGoogle;
   window.handleSignOut = handleSignOut;
+  window.exportDocx = exportDocx;
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => { });
   }
